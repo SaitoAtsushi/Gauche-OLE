@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Gauche-OLE</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" />
+<meta charset="UTF-8" />
+</head>
+<body>
+<h1 id="document">Gauche-OLE</h1>
+<h2 id="introduction">概要</h2>
+<p>Gauche-OLE は OLE オートメーションサーバを Gauche で操作するためのライブラリです。 <code>win.ole</code> モジュールを提供します。</p>
+<p>Windows アプリケーションやライブラリの内のいくつかは COM と呼ばれる呼出し規約を利用して他のプログラムから操作できます。 その中でスクリプト言語からの呼出しを想定したインターフェイスとして <code>IDispatch</code> をそなえたものがあります。 これは OLE オートメーションと呼ばれ、 Gauche-OLE はこの OLE オートメーションの仕組みを Gauche から利用しようとするものです。</p>
+<p>OLE オートメーションをサポートしている代表的な Windows アプリケーションとしては以下が挙げられます。</p>
+<ul>
+<li><a href='http://office.microsoft.com/ja-jp/'>Microsoft Office</a></li>
+<li><a href='http://windows.microsoft.com/ja-jp/internet-explorer/browser-ie'>Internet Explorer</a></li>
+<li><a href='http://www.apple.com/jp/itunes/'>iTunes</a></li>
+<li>Illustrator</li>
+</ul>
+<p>また、 Windows を総合的に管理する API 群である WMI (Windows Management Instrumentation) などを利用して Windows の情報を操作することも可能です。</p>
+<p>このドキュメントは OLE オートメーションの詳細を説明することはしませんので、 MSDN などを参考にしてください。 OLE オートメーションは JScript や VBScript、 または Ruby でよく利用されるので、それらの語句と共にウェブ検索することでも有用な利用例を見付けることが出来るでしょう。</p>
+<h2 id="class">型</h2>
+<h3>&lt;ole&gt;</h3>
+<p>Gauche-OLE が生成するオートメーションオブジェクトは Gauche 上では原則として <code>&lt;ole&gt;</code> 型に対応付けられます。</p>
+<h3>&lt;ole-collection&gt;</h3>
+<p><code>IEnumVARIANT</code> インターフェイスをそなえたオートメーションオブジェクトは <code>&lt;ole-collection&gt;</code> 型に対応付けられます。 <code>&lt;ole-collection&gt;</code> 型は <code>&lt;ole&gt;</code> のサブタイプですので、 <code>&lt;ole&gt;</code> に適用可能な手続きはそのまま利用可能です。 また、 <code>&lt;collection&gt;</code> 型も継承しているので <code>gauche.collection</code> モジュールが提供している各種メソッドを利用できます。</p>
+<h3>&lt;ole-condition&gt;</h3>
+<p>メソッド呼出しやプロパティへのアクセスに失敗した場合に送出される状況型です。 エラーを表す数値を格納しており、その数値は COM における <code>HRESULT</code> 型にそのまま対応しています。 数値の意味については MSDN を参照して下さい。</p>
+<p><a href="http://msdn.microsoft.com/en-us/library/bb446131.aspx">http://msdn.microsoft.com/en-us/library/bb446131.aspx</a></p>
+<h2 id="procedure">手続き</h2>
+<h3>(make-ole string)</h3>
+<p>文字列で与えられたプログラム ID に相当する OLE サーバを起動し、そのサーバに対応するオートメーションオブジェクトを返します。</p>
+<h3>(ole-connect string)</h3>
+<p>文字列で与えられたプログラム ID に相当する実行中の OLE サーバを検索し、そのサーバに対応するオートメーションオブジェクトを返します。</p>
+<h3>(ole-call-method ole symbol args ...)</h3>
+<p>シンボルでメソッド名を指定してオートメーションオブジェクトのメソッドを呼出します。 名前付き引数には対応していません。</p>
+<h3>(ole? obj)</h3>
+<p><code>&lt;ole&gt;</code> 型であるかどうかを判定する述語です。</p>
+<h3>(ole-set! ole symbol obj)</h3>
+<p>シンボルでプロパティ名を指定してオートメーションオブジェクトのプロパティに値をセットします。</p>
+<h3>(ole-ref ole symbol args ...)</h3>
+<p>シンボルでプロパティ名を指定してオートメーションオブジェクトのプロパティの値を参照します。</p>
+<h3>(ole-release! ole ...)</h3>
+<p>オートメーションオブジェクトを解放します。 <code>IUnknown</code> インターフェイスの <code>Release</code> メソッドを呼出すことに相当するものです。 この手続きを適用後の <code>&lt;ole&gt;</code> オブジェクトに対してはどんな操作も出来ません。</p>
+<p>なお、無引数で呼出した場合には全てのオートメーションオブジェクトに対して <code>Release</code> します。</p>
+<p>オートメーションサーバがアウトプロセスの場合に参照が残っている (参照カウンタが減算されない) とスクリプトが終了してもオートメーションサーバが終了しないので、スクリプトの終了直前には <code>ole-release!</code> を呼出すことを推奨します。</p>
+<h3>(ole-condition? obj)</h3>
+<p>オブジェクトが <code>&lt;ole-condition&gt;</code> 型かどうかを判定する述語です。</p>
+<h3>(ole-condition-number ole-condition)</h3>
+<p><code>&lt;ole-condition&gt;</code> 型のオブジェクトからエラーを表す数値を抜き出して返します。</p>
+<h3>(ole-const ole)</h3>
+<p>オートメーションオブジェクトを含むライブラリから定数の連想リストを返します。</p>
+<h3>(ole-methods ole)</h3>
+<p>オートメーションオブジェクトを含むライブラリからメソッドとプロパティの名前をフラグの値と組にした連想リストにして返します。</p>
+<p>フラグの値は <code>VARFLAGS</code> の値に相当します。 <code>VARFLAGS</code> の値の意味は MSDN を参考にして下さい。</p>
+<p><a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms221426(v=vs.85).aspx">http://msdn.microsoft.com/en-us/library/windows/desktop/ms221426(v=vs.85).aspx</a></p>
+<h2 id="method">メソッド</h2>
+<p><code>win.ole</code> モジュールは Gauche がもっている基本的な総称関数にメソッドを追加します。</p>
+<p>上述の通り、 <code>&lt;ole-collection&gt;</code> は <code>gauche.collection</code> の持つ機能を利用可能ですが、以下の説明では省略します。</p>
+<h3>(ref ole symbol)</h3>
+<p><code>ole-ref</code> 相当です。</p>
+<h3>((setter ref) ole symbol obj)</h3>
+<p><code>ole-set!</code> を <code>ole-ref</code> のセッタとして対応付けています。 この定義があることによって、オートメーションのプロパティへの書込みに一般化された <code>set!</code> を使うことが出来ます。</p>
+<h3>(object-apply ole symbol args ...)</h3>
+<p>リストの先頭が <code>&lt;ole&gt;</code> 型のオブジェクトであった場合に自動的に <code>ole-call-method</code> を呼出します。</p>
+<h2 id="syntax">構文</h2>
+<h3>? !</h3>
+<p>JavaScript や Ruby ではメソッドチェインとして表現しているものを Gauche でも書き易くする構文です。</p>
+<p>例えば JavaScript で</p>
+<pre class="sourceCode JavaScript">obj.hoge.fuga(2).piyo();</pre>
+<p>と書いているものは</p>
+<pre class="sourceCode Scheme">(? obj 'hoge ! 'huga 2 ! 'piyo)</pre>
+<p>と書くことが出来ます。</p>
+<p><code>?</code> がプロパティの参照を意味し、 <code>!</code> がメソッド呼出しを意味します。</p>
+<p><code>$</code> の結合の向きを逆方向にしたものと考えるとよいでしょう。</p>
+<p>複数の処理を連鎖しない場合でも単に <code>ole-ref</code> や <code>ole-call-method</code> の短縮記法として利用することも出来ます。</p>
+<h2 id="limitation">既知の制約</h2>
+<p>COM で使われるデータ型と Gauche の型の対応付けが不充分です。 配列を渡す場合、配列が返ってくる場合などでは型変換が出来ないとしてエラーになる場合があります。</p>
+</body>
+</html>

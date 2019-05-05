@@ -1,0 +1,58 @@
+
+body {
+    font-family: "源ノ角ゴシック", Meiryo, sans-serif;
+    text-align: justify;
+    margin: 0;
+    padding:0;
+}
+
+h2 {
+    background-color: #007;
+    border-radius: 1em 0 0 1em;
+    margin: 0.5em 0 0.5em 0.5em;
+    width: auto;
+    color: white;
+    font-weight: bold;
+    padding: 0.4em 0 0.4em 0;
+    color: white;
+    counter-increment: chapter;
+}
+
+h2:before {
+    content: counter(chapter) ".";
+    margin: 0.5em;
+    width: 2em;
+    height: 1em;
+}
+
+h3 {
+    border-left: 0.5em solid #33a;
+    margin: 1em 0 0 1em;
+    padding: 0 0.5em;
+}
+
+p,
+pre {
+    margin: 0 1em 0.5em 2em;
+    padding: 0;
+    line-height: 1.2;
+    width: auto;
+}
+
+h1 {
+    font-size: 200%;
+    margin: 0 -0.5em 0 0em;
+    padding:0;
+    font-weight: bold;
+    background-color: white;
+    color: #007;
+    right: -1em;
+    top: -1em;
+    background: #EEE;
+}
+
+pre {
+    border-radius: 0.5em;
+    background-color: #eee;
+    padding: 0.4em;
+}

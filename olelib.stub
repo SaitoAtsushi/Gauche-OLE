@@ -1,0 +1,64 @@
+;;;
+;;; olelib.stub
+;;;
+
+"
+#include \"gauche-ole.h\"
+#include \"ole-iterator.h\"
+"
+
+(define-type <ole> "IDispatch*" "<ole>"
+  "SCM_OLE_P" "OLE_HANDLE_UNBOX" "OLE_HANDLE_BOX")
+
+(define-type <ole-collection> "IDispatch*" "<ole-collection>"
+  "SCM_OLE_COLLECTION_P" "OLE_HANDLE_UNBOX" "OLE_HANDLE_BOX")
+
+(define-type <ole-iterator> "IEnumVARIANT*" "<ole-iterator>"
+  "SCM_OLE_ITERATOR_P" "OLE_ITERATOR_HANDLE_UNBOX" "OLE_ITERATOR_HANDLE_BOX")
+
+(define-cproc make-ole (prog-id::<string>)
+  (result (Scm_Dispatch prog-id)))
+
+(define-cproc ole-connect (prog-id::<string>)
+  (result (Scm_Connect prog-id)))
+
+(define-cproc ole? (obj)
+  (result (SCM_MAKE_BOOL (SCM_OLE_P obj))))
+
+(define-cproc ole-call-method (obj method-name::<symbol> &rest args)
+  (result (Scm_CallMethod obj method-name args)))
+
+(define-cproc ole-set! (obj prop-name::<symbol> var)
+  (result (Scm_PutProp obj prop-name var)))
+
+(define-cproc ole-ref (obj prop-name::<symbol> &rest args)
+  (result (Scm_GetProp obj prop-name args)))
+
+(define-cproc ole-release! (&rest args) ::<void>
+  (cond
+   ((SCM_NULLP args) (ole_release_all))
+   (else
+    (let* ((lst args))
+      (while (not (SCM_NULLP lst))
+        (Scm_OLE_Release (SCM_CAR lst))
+        (set! lst (SCM_CDR lst)))))))
+
+(define-cproc ole-const (obj)
+  (return (Scm_OLE_Const obj)))
+
+(define-cproc ole-methods (obj)
+  (return (Scm_OLE_Methods obj)))
+
+(define-cproc make-ole-iterator (obj::<ole-collection>) ::<ole-iterator>
+  (result (make_ole_iterator obj)))
+
+(define-cproc ole-iterator-next (obj::<ole-iterator>)
+  (return (ole_iterator_next obj)))
+
+(define-cproc ole-iterator-release (obj) ::<void>
+  (ole_iterator_release obj))
+
+;; Local variables:
+;; mode: scheme
+;; end:
+
